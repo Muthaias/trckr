@@ -105,7 +105,7 @@ class StructDatabase(DatabaseInterface):
             for entry
             in self._data["intervals"]
             if (
-                self._contextid is None 
+                self._contextid is None
                 or entry["contextid"] == self._contextid
             )
             and (

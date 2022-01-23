@@ -16,23 +16,23 @@ How to use Trckr is described by examples. This section includes a number of exa
 ```sh
 # Initialize trckr
 # Creates a ".trckr.json" in the current directory
-trckr init --userid <userid> --contextid <contextid>
+track init --userid <userid> --contextid <contextid>
 
 # Start a timer from now
-trckr start - "Work now"
+track start - "Work now"
 # Stop a timer now
-trckr stop -
+track stop -
 
 # Start a timer from 09:00
-trckr start 9:00 "Later morning work"
+track start 9:00 "Later morning work"
 # Stop timer at specific time
-trckr stop 16:00
+track stop 16:00
 
 # Add entry
-trckr add 9:00 17:00 "Working 9 to 5"
+track add 9:00 17:00 "Working 9 to 5"
 
 # List all entries for active user in active context
-trckr list
+track list
 ```
 
 ### Example config
