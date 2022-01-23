@@ -3,18 +3,17 @@
 
 import json
 from argparse import ArgumentParser
-from .utils import struct_database, parse_date_input
+from .utils import (
+    first_database,
+    parse_date_input,
+    database_loaders
+)
 from .exceptions import TrckrError
 from .commands import Commands
 
 
 DEFAULT_CONFIG_PATH = ".trckr.json"
 commands = Commands()
-
-
-def first_context(config, context_generators):
-    contexts = (generator(config) for generator in context_generators)
-    return next(context for context in contexts if context is not None)
 
 
 def parse_main(argv):
@@ -145,16 +144,21 @@ def main(
     command,
     config,
     context=None,
-    props=None
+    props=None,
+    database_loader=first_database(database_loaders)
 ):
     with open(config, "r") as f:
         config_data = json.load(f)
-        database = first_context(
+        contextid = (
+            {"contextid": context}
+            if context is not None
+            else {}
+        )
+        database = database_loader(
             {
                 **config_data,
-                "contextid": context
+                **contextid
             },
-            [struct_database]
         )
         try:
             commands.exec(command, props, db=database)

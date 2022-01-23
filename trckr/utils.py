@@ -42,3 +42,16 @@ def parse_date_input(date_input):
                 second=time.second
             )
     raise TrckrError(f"Failed to parse date input: {date_input}")
+
+
+def first_database(loaders):
+    def _loader(config):
+        dbs = (loader(config) for loader in loaders)
+        return next(db for db in dbs if db is not None)
+
+    return _loader
+
+
+database_loaders = [
+    struct_database
+]
