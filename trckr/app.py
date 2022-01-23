@@ -206,6 +206,20 @@ def user(config_path, userid):
         config["userid"] = userid
 
 
+@configs.alias(
+    "help",
+    parse_ordered("get help", "command", prog="help")
+)
+def context(config_path, command):
+    command_groups = [
+        commands,
+        configs,
+    ]
+    for group in command_groups:
+        if command in group.commands:
+            group.exec(command, ["-h"])
+
+
 def main(
     command,
     config_path,
