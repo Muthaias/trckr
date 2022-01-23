@@ -23,3 +23,26 @@ A powerful example configurator for a project local config is as follows:
 Name the configuration `.trckr.json` and place it in the root of your project.
 
 When using this config all entries and timers will be tagged with the current system user and stored in the users home directory. This allows you to commit project specific configuratons that will help structured time tracking.
+
+### Example commands
+```sh
+# Initialize trckr
+# Creates a ".trckr.json" in the current directory
+trckr init --userid <userid> --contextid <contextid>
+
+# Start a timer from now
+trckr start - "Work now"
+# Stop a timer now
+trckr stop -
+
+# Start a timer from 09:00
+trckr start 9:00 "Later morning work"
+# Stop timer at specific time
+trckr stop 16:00
+
+# Add entry
+trckr add 9:00 17:00 "Working 9 to 5"
+
+# List all entries for active user in active context
+trckr list
+```
