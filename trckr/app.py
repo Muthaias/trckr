@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import json
+import os
 from argparse import ArgumentParser
 from .utils import (
     first_database,
@@ -12,7 +13,7 @@ from .exceptions import TrckrError
 from .commands import Commands
 
 
-DEFAULT_CONFIG_PATH = ".trckr.json"
+DEFAULT_CONFIG_PATH = os.environ.get("TRCKR_CONFIG", ".trckr.json")
 commands = Commands()
 
 
