@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from datetime import datetime
+from contextlib import suppress
 from .readwrite import JsonFileRW
 from .database import StructDatabase
-from contextlib import suppress
+from .exceptions import TrckrError
 
 
 def struct_database(config):
@@ -29,14 +30,15 @@ def parse_date_input(date_input):
     elif date_input is None:
         return current
     else:
-        time = current
-        with suppress(ValueError):
-            time = datetime.strptime(date_input, "%H:%M")
-        with suppress(ValueError):
-            time = datetime.strptime(date_input, "%H:%M:%S")
+        with suppress(UnboundLocalError):
+            with suppress(ValueError):
+                time = datetime.strptime(date_input, "%H:%M")
+            with suppress(ValueError):
+                time = datetime.strptime(date_input, "%H:%M:%S")
 
-        return current.replace(
-            hour=time.hour,
-            minute=time.minute,
-            second=time.second
-        )
+            return current.replace(
+                hour=time.hour,
+                minute=time.minute,
+                second=time.second
+            )
+    raise TrckrError(f"Failed to parse date input: {date_input}")

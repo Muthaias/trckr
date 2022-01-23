@@ -46,7 +46,7 @@ class DatabaseInterface:
 
 
 class StructDatabase(DatabaseInterface):
-    def __init__(self, rw, userid=None, contextid=None):
+    def __init__(self, rw, userid: str = None, contextid: str = None):
         self._rw = rw
         self._userid = userid
         self._contextid = contextid

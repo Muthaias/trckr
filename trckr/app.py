@@ -4,6 +4,7 @@
 import json
 from argparse import ArgumentParser
 from .utils import struct_database, parse_date_input
+from .exceptions import TrckrError
 from .commands import Commands
 
 
@@ -152,11 +153,7 @@ def main(
             config_data,
             [struct_database]
         )
-    commands.exec(command, props, db=database)
-
-    print(
-        command,
-        config,
-        context,
-        props
-    )
+        try:
+            commands.exec(command, props, db=database)
+        except TrckrError as e:
+            print("Error:", str(e))

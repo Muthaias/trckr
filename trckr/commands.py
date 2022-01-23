@@ -1,6 +1,9 @@
 # SPDX-FileCopyrightText: 2022 Mattias Nyberg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from .exceptions import TrckrError
+
+
 class Commands:
     def __init__(self):
         self._commands = {}
@@ -19,5 +22,8 @@ class Commands:
         return self._commands.keys()
 
     def exec(self, command, argv, **kargs):
-        args = self._parsers[command](argv)
-        return self._commands[command](**args, **kargs)
+        if command in self._commands:
+            args = self._parsers[command](argv)
+            return self._commands[command](**args, **kargs)
+        else:
+            raise TrckrError(f"Command not found: {command}")
