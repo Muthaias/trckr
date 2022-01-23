@@ -10,19 +10,7 @@ The main features are as follows:
 * Get a summary of time
 
 ## Using Trckr
-A powerful example configurator for a project local config is as follows:
-```json
-{
-    "data_type": "json",
-    "path": "%(HOME)s/.trckr-data",
-    "type": "struct",
-    "userid": "%(USER)s",
-    "contextid": "trckr"
-}
-```
-Name the configuration `.trckr.json` and place it in the root of your project.
-
-When using this config all entries and timers will be tagged with the current system user and stored in the users home directory. This allows you to commit project specific configuratons that will help structured time tracking.
+How to use Trckr is described by examples. This section includes a number of example commands and an example of a powerful repo config.
 
 ### Example commands
 ```sh
@@ -46,3 +34,18 @@ trckr add 9:00 17:00 "Working 9 to 5"
 # List all entries for active user in active context
 trckr list
 ```
+
+### Example config
+A powerful example configurator for a project local config is as follows:
+```json
+{
+    "data_type": "json",
+    "path": "%(HOME)s/.trckr-data",
+    "type": "struct",
+    "userid": "%(USER)s",
+    "contextid": "trckr"
+}
+```
+Name the configuration `.trckr.json` and place it in the root of your project.
+
+When using this config all entries and timers will be tagged with the current system user and stored in the users home directory. This allows you to commit project specific configuratons that will help structured time tracking.
