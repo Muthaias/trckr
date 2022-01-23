@@ -150,7 +150,10 @@ def main(
     with open(config, "r") as f:
         config_data = json.load(f)
         database = first_context(
-            config_data,
+            {
+                **config_data,
+                "contextid": context
+            },
             [struct_database]
         )
         try:
