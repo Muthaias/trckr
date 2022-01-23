@@ -89,7 +89,9 @@ def config_from_json(path, **kargs):
 
         return {
             **data,
-            "path": parse_path(data["path"], data)
+            "path": parse_path(data["path"], data),
+            "userid": parse_path(data["userid"], data),
+            "contextid": parse_path(data["contextid"], data)
         }
 
 
