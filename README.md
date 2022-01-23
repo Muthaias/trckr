@@ -1,5 +1,5 @@
 # Disclaimer
-This is not the best code in the world. This is just a tribute. The goal of this project is not to create a `YATTA` (Yet Another Time Tracking Application). The goal is to do some `jurassic parking` and experiment with some ideas that might have been best left unexplored. Some things are overly complicated and others might be interesting.
+This is not the best code in the world. This is just a tribute. The goal of this project is not to create `YATTA` (Yet Another Time Tracking Application). The goal is to do some `jurassic parking` and experiment with some ideas that might have been best left unexplored. Some things are overly complicated and others might be interesting.
 
 # Trckr
 Trckr is a command line based time tracking tool or a `YATTA`. This tool wants to be a flexible and efficient way of tracking time spent over different projects. What it actually is, will be up to the users to decide.
