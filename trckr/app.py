@@ -1,13 +1,13 @@
 # SPDX-FileCopyrightText: 2022 Mattias Nyberg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import json
 import os
 from argparse import ArgumentParser
 from .utils import (
     first_database,
     parse_date_input,
-    database_loaders
+    database_loaders,
+    config_from_json
 )
 from .exceptions import TrckrError
 from .commands import Commands
@@ -148,19 +148,13 @@ def main(
     props=None,
     database_loader=first_database(database_loaders)
 ):
-    with open(config, "r") as f:
-        config_data = json.load(f)
-        contextid = (
-            {"contextid": context}
-            if context is not None
-            else {}
-        )
-        database = database_loader(
-            {
-                **config_data,
-                **contextid
-            },
-        )
+    contextid = (
+        {"contextid": context}
+        if context is not None
+        else {}
+    )
+    with config_from_json(config, **contextid) as config_data:
+        database = database_loader(config_data)
         try:
             commands.exec(command, props, db=database)
         except TrckrError as e:

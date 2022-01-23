@@ -1,11 +1,37 @@
 # SPDX-FileCopyrightText: 2022 Mattias Nyberg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import os
+import getpass
+import json
+from contextlib import contextmanager
 from datetime import datetime
 from contextlib import suppress
 from .readwrite import JsonFileRW
 from .database import StructDatabase
 from .exceptions import TrckrError
+
+
+def parse_path(path_template, config):
+    config_path = config["_path"]
+    contextid = config["contextid"]
+    userid = config["userid"]
+    config_dir = os.path.dirname(config_path)
+    home = os.path.expanduser("~")
+    user = getpass.getuser()
+    data = {
+        "CONFIG_DIR": config_dir,
+        "CONFIG_PATH": config_path,
+        "USERID": userid,
+        "CONTEXTID": contextid,
+        "HOME": home,
+        "USER": user,
+    }
+    try:
+        return path_template % data
+    except (ValueError, KeyError) as e:
+        raise TrckrError(f"Failed to parse path template: {str(e)}: in '{path_template}'")
+
 
 
 def struct_database(config):
@@ -50,6 +76,21 @@ def first_database(loaders):
         return next(db for db in dbs if db is not None)
 
     return _loader
+
+
+@contextmanager
+def config_from_json(path, **kargs):
+    with open(path, "r") as f:
+        data = {
+            **json.load(f),
+            **kargs,
+            "_path": path
+        }
+
+        yield {
+            **data,
+            "path": parse_path(data["path"], data)
+        }
 
 
 database_loaders = [
