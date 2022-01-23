@@ -147,6 +147,18 @@ def parse_args(
         help="use a temporary user id"
     )
 
+    def _show_help(*args, **kargs):
+        parser.print_help()
+
+    def _noprop(*args, **kargs):
+        return {}
+
+    parser.set_defaults(
+        func=_show_help,
+        props=_noprop,
+        select=select_args()
+    )
+
     subparsers = parser.add_subparsers()
 
     add_parse = subparsers.add_parser(
