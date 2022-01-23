@@ -11,7 +11,7 @@ The main features are as follows:
 
 ## Using Trckr
 A powerful example configurator for a project local config is as follows:
-```
+```json
 {
     "data_type": "json",
     "path": "%(HOME)s/.trckr-data",
@@ -20,4 +20,6 @@ A powerful example configurator for a project local config is as follows:
     "contextid": "trckr"
 }
 ```
-When using `Trckr` in a repo with this config all entries and timers will be tagged with the current system user and stored in the users home directory. This allows you to commit project specific configuratons that will help structured time tracking.
+Name the configuration `.trckr.json` and place it in the root of your project.
+
+When using this config all entries and timers will be tagged with the current system user and stored in the users home directory. This allows you to commit project specific configuratons that will help structured time tracking.
