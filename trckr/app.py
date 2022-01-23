@@ -7,7 +7,8 @@ from .utils import (
     first_database,
     parse_date_input,
     database_loaders,
-    config_from_json
+    config_from_json,
+    writable_config
 )
 from .exceptions import TrckrError
 from .commands import Commands
@@ -15,6 +16,7 @@ from .commands import Commands
 
 DEFAULT_CONFIG_PATH = os.environ.get("TRCKR_CONFIG", ".trckr.json")
 commands = Commands()
+configs = Commands()
 
 
 def parse_main(argv):
@@ -44,13 +46,16 @@ def parse_main(argv):
     return {
         "command": args.command,
         "context": args.context,
-        "config": args.config,
+        "config_path": args.config,
         "props": unknown_argv,
     }
 
 
 def parse_add(argv):
-    parser = ArgumentParser(description="Add an interval")
+    parser = ArgumentParser(
+        description="Add an interval",
+        prog="add"
+    )
     parser.add_argument(
         "start",
         type=str,
@@ -77,7 +82,10 @@ def parse_add(argv):
 
 
 def parse_start(argv):
-    parser = ArgumentParser(description="Start the timer")
+    parser = ArgumentParser(
+        description="Start the timer",
+        prog="start"
+    )
     parser.add_argument(
         "note",
         type=str,
@@ -99,7 +107,10 @@ def parse_start(argv):
 
 
 def parse_stop(argv):
-    parser = ArgumentParser(description="Stop the timer")
+    parser = ArgumentParser(
+        description="Stop the timer",
+        prog="stop"
+    )
     parser.add_argument(
         "--when",
         type=str,
@@ -115,6 +126,25 @@ def parse_stop(argv):
 
 def parse_none(argv):
     return {}
+
+
+def parse_ordered(description, *argids, prog=None):
+    def _parse(argv):
+        parser = ArgumentParser(
+            description=description,
+            prog=prog
+        )
+        for arg in argids:
+            parser.add_argument(
+                arg,
+                type=str
+            )
+        args = vars(parser.parse_args(argv))
+        return {
+            arg: args[arg]
+            for arg in argids
+        }
+    return _parse
 
 
 @commands.alias("add", parse_add)
@@ -141,21 +171,59 @@ def list(db):
         print(entry.note, entry.start, entry.stop)
 
 
+@configs.alias(
+    "init",
+    parse_ordered(
+        "initialize trckr",
+        "userid",
+        "contextid",
+        prog="init"
+    )
+)
+def init(config_path, userid=None, contextid=None):
+    with writable_config(config_path) as config:
+        if userid is not None:
+            config["userid"] = userid
+        if contextid is not None:
+            config["contextid"] = contextid
+
+
+@configs.alias(
+    "context",
+    parse_ordered("set active context", "contextid", prog="context")
+)
+def context(config_path, contextid):
+    with writable_config(config_path) as config:
+        config["contextid"] = contextid
+
+
+@configs.alias(
+    "user",
+    parse_ordered("set active user", "userid", prog="user")
+)
+def user(config_path, userid):
+    with writable_config(config_path) as config:
+        config["userid"] = userid
+
+
 def main(
     command,
-    config,
+    config_path,
     context=None,
     props=None,
     database_loader=first_database(database_loaders)
 ):
-    contextid = (
-        {"contextid": context}
-        if context is not None
-        else {}
-    )
-    with config_from_json(config, **contextid) as config_data:
-        database = database_loader(config_data)
-        try:
-            commands.exec(command, props, db=database)
-        except TrckrError as e:
-            print("Error:", str(e))
+    if command in configs.commands:
+        configs.exec(command, props, config_path=config_path)
+    else:
+        contextid = (
+            {"contextid": context}
+            if context is not None
+            else {}
+        )
+        with config_from_json(config_path, **contextid) as config_data:
+            database = database_loader(config_data)
+            try:
+                commands.exec(command, props, db=database)
+            except TrckrError as e:
+                print("Error:", str(e))

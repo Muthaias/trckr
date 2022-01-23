@@ -30,8 +30,9 @@ def parse_path(path_template, config):
     try:
         return path_template % data
     except (ValueError, KeyError) as e:
-        raise TrckrError(f"Failed to parse path template: {str(e)}: in '{path_template}'")
-
+        raise TrckrError(
+            f"Failed to parse path template: {str(e)}: in '{path_template}'"
+        )
 
 
 def struct_database(config):
@@ -91,6 +92,27 @@ def config_from_json(path, **kargs):
             **data,
             "path": parse_path(data["path"], data)
         }
+
+
+@contextmanager
+def writable_config(path):
+    try:
+        with open(path, "r") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        data = {
+            "contextid": "default",
+            "data_type": "json",
+            "path": "%(CONFIG_PATH)s",
+            "type": "struct",
+            "userid": getpass.getuser()
+        }
+
+    yield data
+    serialized = json.dumps(data, indent=4, sort_keys=True)
+
+    with open(path, "w") as f:
+        f.write(serialized)
 
 
 database_loaders = [
