@@ -79,7 +79,6 @@ def first_database(loaders):
     return _loader
 
 
-@contextmanager
 def config_from_json(path, **kargs):
     with open(path, "r") as f:
         data = {
@@ -88,7 +87,7 @@ def config_from_json(path, **kargs):
             "_path": path
         }
 
-        yield {
+        return {
             **data,
             "path": parse_path(data["path"], data)
         }
