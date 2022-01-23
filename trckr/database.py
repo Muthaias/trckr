@@ -15,6 +15,29 @@ class Entry:
     note: str
     id: str
 
+    def intersection(self, start, stop):
+        start = (
+            start
+            if start is not None and start > self.start
+            else self.start
+        )
+        stop = (
+            stop
+            if stop is not None and stop < self.stop
+            else self.stop
+        )
+        if start < stop:
+            return Entry(
+                start=start,
+                stop=stop,
+                userid=self.userid,
+                contextid=self.contextid,
+                note=self.note,
+                id=self.id
+            )
+        else:
+            return None
+
     @staticmethod
     def from_data(data):
         return Entry(
@@ -38,6 +61,12 @@ class DatabaseInterface:
         raise NotImplementedError()
 
     def commit(self):
+        raise NotImplementedError()
+
+    def select(
+        from_time: datetime = None,
+        to_time: datetime = None
+    ) -> list[Entry]:
         raise NotImplementedError()
 
     @property
@@ -70,6 +99,21 @@ class StructDatabase(DatabaseInterface):
             "note": note
         }
 
+    def _entries(self):
+        return (
+            Entry.from_data(entry)
+            for entry
+            in self._data["intervals"]
+            if (
+                self._contextid is None 
+                or entry["contextid"] == self._contextid
+            )
+            and (
+                self._userid is None
+                or entry["userid"] == self._userid
+            )
+        )
+
     def start(self, time: datetime, note: str = None):
         self.stop(time)
         self._data["timer"] = self._entry(time, note=note)
@@ -92,13 +136,21 @@ class StructDatabase(DatabaseInterface):
     def commit(self):
         self._rw.write(self._data)
 
+    def select(
+        self,
+        from_time: datetime = None,
+        to_time: datetime = None
+    ) -> list[Entry]:
+        entries = (
+            entry.intersection(from_time, to_time)
+            for entry in self._entries()
+        )
+        return [
+            entry
+            for entry in entries
+            if entry is not None
+        ]
+
     @property
     def entries(self) -> list[Entry]:
-        return [
-            Entry.from_data(entry)
-            for entry
-            in self._data["intervals"]
-            if entry["contextid"] == self._contextid
-            and entry["userid"] == self._userid
-            or (self._contextid is None and self._userid is None)
-        ]
+        return list(self._entries())

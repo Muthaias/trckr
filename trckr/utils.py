@@ -28,19 +28,26 @@ def parse_path(path_template, config):
         "USER": user,
     }
     try:
-        return path_template % data
+        return path_template % {
+            key: str(value)
+            for key, value in data.items()
+        }
     except (ValueError, KeyError) as e:
         raise TrckrError(
             f"Failed to parse path template: {str(e)}: in '{path_template}'"
         )
 
 
+def parse_id(id):
+    return None if id == "-" else id
+
+
 def struct_database(config):
     if config["type"] == "struct":
         path = config["path"]
         data_type = config["data_type"]
-        contextid = config["contextid"]
-        userid = config["userid"]
+        contextid = parse_id(config["contextid"])
+        userid = parse_id(config["userid"])
         if data_type == "json":
             return StructDatabase(
                 rw=JsonFileRW(path),

@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import os
+import datetime
+from itertools import groupby
+from operator import attrgetter
 from argparse import ArgumentParser
 from .utils import (
     first_database,
@@ -31,9 +34,34 @@ def stop(db, time, note=None):
     db.commit()
 
 
-def list(db):
-    for entry in db.entries:
-        print(entry.note, entry.start, entry.stop)
+def list_entries(db, from_time=None, to_time=None, format="list"):
+    entries = db.select(
+        from_time=from_time,
+        to_time=to_time
+    )
+
+    def _hours_and_minutes(td):
+        return (
+            td.days * 24 + td.seconds // 3600,
+            td.seconds // 60 % 60
+        )
+
+    grouped_entries = groupby(entries, key=attrgetter("contextid"))
+    timeformat = "%02dh %02dm"
+    for contextid, group_entries in grouped_entries:
+        entry_list = list(group_entries)
+        groupsum = sum(
+            [entry.stop - entry.start for entry in entry_list],
+            datetime.timedelta()
+        )
+        print(f"{contextid}: {timeformat % _hours_and_minutes(groupsum)}")
+        for entry in entry_list:
+            difference = entry.stop - entry.start
+            print(
+                f"  {entry.start.date()}: "
+                f"{timeformat % _hours_and_minutes(difference)} "
+                f"# {entry.note}"
+            )
 
 
 def init(config_path, userid=None, contextid=None):
@@ -111,7 +139,6 @@ def parse_args(
     parser.add_argument(
         "--contextid",
         type=str,
-        default=None,
         help="use a temporary context id"
     )
     parser.add_argument(
@@ -169,7 +196,7 @@ def parse_args(
 
     stop_parse = subparsers.add_parser(
         "stop",
-        help="stop the curren timer"
+        help="stop the current timer"
     )
     stop_parse.add_argument(
         "time",
@@ -180,6 +207,33 @@ def parse_args(
         func=stop,
         props=database_prop_func,
         select=select_args("time")
+    )
+
+    list_parse = subparsers.add_parser(
+        "list",
+        help="list entries"
+    )
+    list_parse.add_argument(
+        "--from",
+        dest="from_time",
+        type=parse_date_input,
+        help="start of interval"
+    )
+    list_parse.add_argument(
+        "--to",
+        dest="to_time",
+        type=parse_date_input,
+        help="end of interval"
+    )
+    list_parse.add_argument(
+        "--format",
+        type=str,
+        help="output format"
+    )
+    list_parse.set_defaults(
+        func=list_entries,
+        props=database_prop_func,
+        select=select_args("format", "from_time", "to_time")
     )
 
     init_parse = subparsers.add_parser(
