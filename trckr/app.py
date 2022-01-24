@@ -78,16 +78,16 @@ def set_user(config_path, userid):
 
 def database_from_config(config_path, loader, contextid=None, userid=None):
     overrides = {
-        "contextid": contextid,
-        "userid": userid,
+        key: value
+        for key, value in {
+            "contextid": contextid,
+            "userid": userid,
+        }.items()
+        if value is not None
     }
     config_data = config_from_json(
         config_path,
-        **{
-            key: value
-            for key, value in overrides.items()
-            if value is not None
-        }
+        overrides
     )
     return loader(config_data)
 

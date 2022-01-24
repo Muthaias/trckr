@@ -86,10 +86,14 @@ def first_database(loaders):
     return _loader
 
 
-def config_from_json(path, **kargs):
+def config_from_json(path, overrides):
     with open(path, "r") as f:
+        base_data = json.load(f)
+        if base_data["locked"] is True and len(overrides.keys()):
+            raise TrckrError("Overrides not allowed in locked config")
+
         data = {
-            **json.load(f),
+            **base_data,
             **kargs,
             "_path": path
         }
@@ -115,6 +119,9 @@ def writable_config(path):
             "type": "struct",
             "userid": getpass.getuser()
         }
+    
+    if data["locked"] is True:
+        raise TrckrError("Configuration changes not allowed in locked config.")
 
     yield data
     serialized = json.dumps(data, indent=4, sort_keys=True)
