@@ -43,7 +43,8 @@ A powerful example configurator for a project local config is as follows:
     "path": "%(HOME)s/.trckr-data",
     "type": "struct",
     "userid": "%(USER)s",
-    "contextid": "trckr"
+    "contextid": "trckr",
+    "locked": true
 }
 ```
 Name the configuration `.trckr.json` and place it in the root of your project.
