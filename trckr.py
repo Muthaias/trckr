@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import sys
-from trckr import app
+from trckr import app, cli
 
 
 if __name__ == "__main__":
     app.main(
-        **app.parse_args(
+        **cli.parse_args(
             sys.argv[1:]
         )
     )
