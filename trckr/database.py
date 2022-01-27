@@ -3,16 +3,30 @@
 
 import uuid
 from datetime import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
+from collections import ChainMap
+
+
+@dataclass
+class Meta:
+    userid: str
+    contextid: str
+    note: str
+
+    @staticmethod
+    def from_data(data):
+        return Meta(
+            userid=data["userid"],
+            contextid=data["contextid"],
+            note=data["note"],
+        )
 
 
 @dataclass
 class Entry:
     start: datetime
     stop: datetime
-    contextid: str
-    userid: str
-    note: str
+    meta: Meta
     id: str
 
     def intersection(self, start, stop):
@@ -30,9 +44,7 @@ class Entry:
             return Entry(
                 start=start,
                 stop=stop,
-                userid=self.userid,
-                contextid=self.contextid,
-                note=self.note,
+                meta=self.meta,
                 id=self.id
             )
         else:
@@ -43,21 +55,19 @@ class Entry:
         return Entry(
             start=datetime.fromisoformat(data["start"]),
             stop=datetime.fromisoformat(data["stop"]),
-            userid=data["userid"],
-            contextid=data["contextid"],
-            note=data["note"],
+            meta=Meta.from_data(data["meta"]),
             id=data["id"]
         )
 
 
 class DatabaseInterface:
-    def start(self, time: datetime, note: str = None):
+    def start(self, time: datetime, meta: Meta = None):
         raise NotImplementedError()
 
     def stop(self, time: datetime):
         raise NotImplementedError()
 
-    def add(self, start: datetime, stop: datetime, note: str = None):
+    def add(self, start: datetime, stop: datetime, meta: Meta = None):
         raise NotImplementedError()
 
     def commit(self):
@@ -75,48 +85,42 @@ class DatabaseInterface:
 
 
 class StructDatabase(DatabaseInterface):
-    def __init__(self, rw, userid: str = None, contextid: str = None):
+    def __init__(self, rw):
         self._rw = rw
-        self._userid = userid
-        self._contextid = contextid
-        self._data = self._rw.read(
+        self._data = ChainMap(
+            self._rw.read({}),
             {
-                "intervals": [],
+                "entries": [],
                 "timer": None
-            }
+            },
         )
 
     def _generate_id(self):
         return str(uuid.uuid4())
 
-    def _entry(self, start: datetime, stop: datetime = None, note: str = None):
+    def _entry(
+        self,
+        start: datetime,
+        stop: datetime = None,
+        meta: Meta = None
+    ):
         return {
             "id": self._generate_id(),
-            "contextid": self._contextid,
-            "userid": self._userid,
             "start": str(start),
             "stop": str(stop),
-            "note": note
+            "meta": asdict(meta)
         }
 
     def _entries(self):
         return (
             Entry.from_data(entry)
             for entry
-            in self._data["intervals"]
-            if (
-                self._contextid is None
-                or entry["contextid"] == self._contextid
-            )
-            and (
-                self._userid is None
-                or entry["userid"] == self._userid
-            )
+            in self._data["entries"]
         )
 
-    def start(self, time: datetime, note: str = None):
+    def start(self, time: datetime, meta: Meta = None):
         self.stop(time)
-        self._data["timer"] = self._entry(time, note=note)
+        self._data["timer"] = self._entry(time, meta=meta)
 
     def stop(self, time: datetime):
         timer = self._data["timer"]
@@ -126,15 +130,15 @@ class StructDatabase(DatabaseInterface):
                 "stop": str(time)
             }
             self._data["timer"] = None
-            self._data["intervals"].append(old_timer)
+            self._data["entries"].append(old_timer)
 
-    def add(self, start: datetime, stop: datetime, note: str = None):
-        self._data["intervals"].append(
-            self._entry(start, stop, note)
+    def add(self, start: datetime, stop: datetime, meta: Meta = None):
+        self._data["entries"].append(
+            self._entry(start, stop, meta)
         )
 
     def commit(self):
-        self._rw.write(self._data)
+        self._rw.write(dict(self._data))
 
     def select(
         self,

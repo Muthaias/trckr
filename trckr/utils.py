@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2022 Mattias Nyberg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import os
-import getpass
 import json
 from contextlib import contextmanager
 from datetime import datetime
@@ -12,21 +10,22 @@ from .database import StructDatabase
 from .exceptions import TrckrError
 
 
-def parse_path(path_template, config):
-    config_path = config["_path"]
-    contextid = config["contextid"]
-    userid = config["userid"]
-    config_dir = os.path.dirname(config_path)
-    home = os.path.expanduser("~")
-    user = getpass.getuser()
-    data = {
-        "CONFIG_DIR": config_dir,
-        "CONFIG_PATH": config_path,
-        "USERID": userid,
-        "CONTEXTID": contextid,
-        "HOME": home,
-        "USER": user,
+def default_config():
+    return {
+        "database": {
+            "data_type": "json",
+            "path": "%(HOME)s/.trckr-%(GITNAME)s",
+            "type": "struct",
+        },
+        "defaults": {
+            "contextid": "%(GITNAME)s",
+            "userid": "%(USER)s",
+            "note": "%(GITNAME)s-%(GITBRANCH)s",
+        }
     }
+
+
+def parse_path(path_template, data):
     try:
         return path_template % {
             key: str(value)
@@ -43,17 +42,17 @@ def parse_id(id):
 
 
 def struct_database(config):
-    if config["type"] == "struct":
-        path = config["path"]
-        data_type = config["data_type"]
-        contextid = parse_id(config["contextid"])
-        userid = parse_id(config["userid"])
-        if data_type == "json":
-            return StructDatabase(
-                rw=JsonFileRW(path),
-                userid=userid,
-                contextid=contextid
-            )
+    try:
+        dbconf = config["database"]
+        if dbconf["type"] == "struct":
+            path = dbconf["path"]
+            data_type = dbconf["data_type"]
+            if data_type == "json":
+                return StructDatabase(
+                    rw=JsonFileRW(path),
+                )
+    except KeyError:
+        pass
     return None
 
 
@@ -86,24 +85,54 @@ def first_database(loaders):
     return _loader
 
 
-def config_from_json(path, overrides):
-    with open(path, "r") as f:
-        base_data = json.load(f)
-        if base_data["locked"] is True and len(overrides.keys()):
-            raise TrckrError("Overrides not allowed in locked config")
+def config_from_json(path, extensions=None):
+    try:
+        with open(path, "r") as f:
+            base_data = json.load(f)
+    except FileNotFoundError:
+        base_data = default_config()
 
-        data = {
-            **base_data,
-            **kargs,
-            "_path": path
-        }
+    data = {
+        **base_data,
+        "_path": path
+    }
+    ext_data = (
+        {}
+        if extensions is None
+        else extensions(data)
+    )
 
-        return {
-            **data,
-            "path": parse_path(data["path"], data),
-            "userid": parse_path(data["userid"], data),
-            "contextid": parse_path(data["contextid"], data)
-        }
+    defaults = {
+        key: parse_path(value, ext_data)
+        for key, value in data.get("defaults", {}).items()
+    }
+
+    return {
+        **data,
+        "database": {
+            **data["database"],
+            "path": parse_path(data["database"]["path"], ext_data),
+        },
+        "defaults": defaults
+    }
+
+
+def insert_into_struct(struct, path, value):
+    try:
+        current = struct
+        for p in path[0:-1]:
+            current[p] = current.get(p, {})
+            current = current[p]
+        p = path[-1]
+        if (
+            isinstance(current.get(p), dict)
+            or isinstance(current.get(p), list)
+        ):
+            raise TrckrError(f"Cannot replace object with value: {property}")
+        else:
+            current[p] = value
+    except KeyError:
+        raise TrckrError(f"Propery path not accessable: '{property}'")
 
 
 @contextmanager
@@ -112,15 +141,9 @@ def writable_config(path):
         with open(path, "r") as f:
             data = json.load(f)
     except FileNotFoundError:
-        data = {
-            "contextid": "default",
-            "data_type": "json",
-            "path": "%(CONFIG_PATH)s",
-            "type": "struct",
-            "userid": getpass.getuser()
-        }
-    
-    if data["locked"] is True:
+        data = default_config()
+
+    if data.get("locked") is True:
         raise TrckrError("Configuration changes not allowed in locked config.")
 
     yield data

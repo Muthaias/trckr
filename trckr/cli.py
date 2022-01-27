@@ -3,9 +3,6 @@
 
 import os
 from argparse import ArgumentParser
-from .utils import (
-    parse_date_input,
-)
 
 
 DEFAULT_CONFIG_PATH = os.environ.get("TRCKR_CONFIG", ".trckr.json")
@@ -54,17 +51,17 @@ def parse_args(
         help="add an interval with a note"
     )
     add_parse.add_argument(
-        "start",
-        type=parse_date_input,
+        "from",
+        type=str,
         help="start of interval"
     )
     add_parse.add_argument(
-        "stop",
-        type=parse_date_input,
+        "to",
+        type=str,
         help="end of interval"
     )
     add_parse.add_argument(
-        "note",
+        "--note",
         type=str,
         help="a note for the interval"
     )
@@ -77,12 +74,12 @@ def parse_args(
         help="start the timer with a note"
     )
     start_parse.add_argument(
-        "time",
-        type=parse_date_input,
-        help="the time to start at"
+        "--from",
+        type=str,
+        help="start of interval"
     )
     start_parse.add_argument(
-        "note",
+        "--note",
         type=str,
         help="a note for the interval"
     )
@@ -95,9 +92,9 @@ def parse_args(
         help="stop the current timer"
     )
     stop_parse.add_argument(
-        "time",
-        type=parse_date_input,
-        help="the time to stop at"
+        "--to",
+        type=str,
+        help="end of interval"
     )
     stop_parse.set_defaults(
         command="stop"
@@ -109,14 +106,12 @@ def parse_args(
     )
     list_parse.add_argument(
         "--from",
-        dest="from_time",
-        type=parse_date_input,
+        type=str,
         help="start of interval"
     )
     list_parse.add_argument(
         "--to",
-        dest="to_time",
-        type=parse_date_input,
+        type=str,
         help="end of interval"
     )
     list_parse.add_argument(
@@ -132,46 +127,26 @@ def parse_args(
         "init",
         help="initialize a new trckr"
     )
-    init_parse.add_argument(
-        "--user",
-        dest="userid",
-        type=str,
-        help="the default user for the trckr"
-    )
-    init_parse.add_argument(
-        "--context",
-        dest="contextid",
-        type=str,
-        help="the default context for the trckr"
-    )
     init_parse.set_defaults(
         command="init"
     )
 
     context_parse = subparsers.add_parser(
-        "context",
-        help="set active context id"
+        "set",
+        help="set a value"
     )
     context_parse.add_argument(
-        "contextid",
+        "property",
         type=str,
-        help="a context id or alias"
+        help="value id"
+    )
+    context_parse.add_argument(
+        "value",
+        type=str,
+        help="value"
     )
     context_parse.set_defaults(
-        command="context"
-    )
-
-    user_parse = subparsers.add_parser(
-        "user",
-        help="set active user id"
-    )
-    user_parse.add_argument(
-        "userid",
-        type=str,
-        help="a user id or alias"
-    )
-    user_parse.set_defaults(
-        command="user"
+        command="set"
     )
 
     args = parser.parse_args(argv)

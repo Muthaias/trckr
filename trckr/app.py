@@ -4,12 +4,16 @@
 import datetime
 from itertools import groupby
 from operator import attrgetter
+from .data_extensions import standard_extensions
 from .utils import (
     first_database,
     database_loaders,
     config_from_json,
-    writable_config
+    writable_config,
+    parse_date_input,
+    insert_into_struct,
 )
+from .database import Meta
 from .exceptions import TrckrError
 
 
@@ -40,7 +44,10 @@ def list_entries(db, from_time=None, to_time=None, format="list"):
             td.seconds // 60 % 60
         )
 
-    grouped_entries = groupby(entries, key=attrgetter("contextid"))
+    grouped_entries = groupby(
+        entries,
+        key=lambda e: e.meta.contextid
+    )
     timeformat = "%02dh %02dm"
     for contextid, group_entries in grouped_entries:
         entry_list = list(group_entries)
@@ -54,72 +61,70 @@ def list_entries(db, from_time=None, to_time=None, format="list"):
             print(
                 f"  {entry.start.date()}: "
                 f"{timeformat % _hours_and_minutes(difference)} "
-                f"# {entry.note}"
+                f"# {entry.meta.note}"
             )
 
 
-def init_tracker(config_path, userid=None, contextid=None):
+def set_property(config_path, property, value):
+    path = property.split(".")
     with writable_config(config_path) as config:
-        if userid is not None:
-            config["userid"] = userid
-        if contextid is not None:
-            config["contextid"] = contextid
+        insert_into_struct(config, path, value)
 
 
-def set_context(config_path, contextid):
-    with writable_config(config_path) as config:
-        config["contextid"] = contextid
-
-
-def set_user(config_path, userid):
-    with writable_config(config_path) as config:
-        config["userid"] = userid
-
-
-def database_from_config(config_path, loader, contextid=None, userid=None):
-    overrides = {
-        key: value
-        for key, value in {
-            "contextid": contextid,
-            "userid": userid,
-        }.items()
-        if value is not None
-    }
-    config_data = config_from_json(
+def load_config(config_path):
+    return config_from_json(
         config_path,
-        overrides
+        standard_extensions
     )
-    return loader(config_data)
+
+
+def load_database(
+    config,
+    database_loader=first_database(database_loaders)
+):
+    return database_loader(config)
 
 
 def main(
+    config,
+    database,
     command,
-    config_path,
-    contextid=None,
-    userid=None,
-    database_loader=first_database(database_loaders),
     **kargs
 ):
+    args = {
+        **config.get("defaults", {}),
+        **{
+            key: value
+            for key, value in kargs.items()
+            if value is not None
+        }
+    }
     try:
+        config_path = config["_path"]
+        from_time = parse_date_input(args.get("from"))
+        to_time = parse_date_input(args.get("to"))
+        meta = Meta.from_data(args)
         tracker_cmds = {
-            "add": add_entry,
-            "start": start_timer,
-            "stop": stop_timer,
-            "list": list_entries
+            "add": lambda db: add_entry(db, from_time, to_time, meta),
+            "start": lambda db: start_timer(db, from_time, meta),
+            "stop": lambda db: stop_timer(db, to_time),
+            "list": lambda db: list_entries(db)
         }
         root_cmds = {
-            "init": lambda: init_tracker(config_path, contextid, userid),
-            "context": lambda: set_context(config_path, contextid),
-            "user": lambda: set_user(config_path, userid)
+            "init": lambda: set_property(
+                config_path,
+                "created",
+                str(datetime.datetime.now())
+            ),
+            "set": lambda: set_property(
+                config_path,
+                args["property"],
+                args["value"]
+            ),
         }
         if command in tracker_cmds:
-            db = database_from_config(
-                config_path,
-                database_loader,
-                contextid=contextid,
-                userid=userid
-            )
-            tracker_cmds[command](db=db, **kargs)
+            tracker_cmds[command](database)
+
         elif command in root_cmds:
             root_cmds[command]()
     except TrckrError as e:
