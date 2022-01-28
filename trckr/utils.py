@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import json
+import calendar
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, timedelta
 from contextlib import suppress
 from .readwrite import JsonFileRW
 from .database import StructDatabase
@@ -75,6 +76,70 @@ def parse_date_input(date_input):
                 second=time.second
             )
     raise TrckrError(f"Failed to parse date input: {date_input}")
+
+
+def parse_interval(interval):
+    if interval is None:
+        return (None, None)
+
+    current = datetime.now()
+    if (
+        interval == "today"
+        or interval == "day"
+    ):
+        return (
+            current.replace(
+                hour=0,
+                minute=0,
+                second=0
+            ),
+            current.replace(
+                hour=23,
+                minute=59,
+                second=59
+            )
+        )
+    if interval == "week":
+        days = calendar.weekday(current.year, current.month, current.day)
+        delta_back = timedelta(days=days)
+        delta_forward = timedelta(days=6-days)
+        return (
+            current.replace(
+                hour=0,
+                minute=0,
+                second=0
+            ) - delta_back,
+            current.replace(
+                hour=23,
+                minute=59,
+                second=59
+            ) + delta_forward
+        )
+    elif interval == "month":
+        (start, end) = calendar.monthrange(current.year, current.month)
+        return (
+            current.replace(
+                day=start,
+                hour=0,
+                minute=0,
+                second=0
+            ),
+            current.replace(
+                day=end,
+                hour=23,
+                minute=0,
+                second=0
+            )
+        )
+    else:
+        with suppress(ValueError):
+            [a, b] = interval.split("-")
+            return (
+                parse_date_input(a),
+                parse_date_input(b)
+            )
+
+    raise TrckrError(f"Unable to parse interval: '{interval}'")
 
 
 def first_database(loaders):

@@ -31,8 +31,8 @@ track stop 16:00
 # Add entry
 track add 9:00 17:00 "Working 9 to 5"
 
-# List all entries for active user in active context
-track list
+# List all entries for active user in active context today
+track list today
 ```
 
 ### Example config

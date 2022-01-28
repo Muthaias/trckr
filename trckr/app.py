@@ -12,6 +12,7 @@ from .utils import (
     writable_config,
     parse_date_input,
     insert_into_struct,
+    parse_interval,
 )
 from .database import Meta
 from .exceptions import TrckrError
@@ -109,7 +110,7 @@ def main(
             "add": lambda db: add_entry(db, from_time, to_time, meta),
             "start": lambda db: start_timer(db, from_time, meta),
             "stop": lambda db: stop_timer(db, to_time),
-            "list": lambda db: list_entries(db)
+            "list": lambda db: list_entries(db, *parse_interval(args.get("interval")))
         }
         root_cmds = {
             "init": lambda: set_property(

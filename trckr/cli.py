@@ -105,14 +105,9 @@ def parse_args(
         help="list entries"
     )
     list_parse.add_argument(
-        "--from",
+        "interval",
         type=str,
-        help="start of interval"
-    )
-    list_parse.add_argument(
-        "--to",
-        type=str,
-        help="end of interval"
+        help="interval"
     )
     list_parse.add_argument(
         "--format",
