@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime
 from dataclasses import dataclass, asdict
 from collections import ChainMap
+from .exceptions import TrckrError
 
 
 @dataclass
@@ -118,11 +119,7 @@ class StructDatabase(DatabaseInterface):
             in self._data["entries"]
         )
 
-    def start(self, time: datetime, meta: Meta = None):
-        self.stop(time)
-        self._data["timer"] = self._entry(time, meta=meta)
-
-    def stop(self, time: datetime):
+    def _stop(self, time: datetime):
         timer = self._data["timer"]
         if timer is not None:
             old_timer = {
@@ -131,6 +128,17 @@ class StructDatabase(DatabaseInterface):
             }
             self._data["timer"] = None
             self._data["entries"].append(old_timer)
+
+    def start(self, time: datetime, meta: Meta = None):
+        self._stop(time)
+        self._data["timer"] = self._entry(time, meta=meta)
+
+    def stop(self, time: datetime):
+        timer = self._data["timer"]
+        if timer is not None:
+            self._stop(time)
+        else:
+            raise TrckrError("No existing timer to stop.")
 
     def add(self, start: datetime, stop: datetime, meta: Meta = None):
         self._data["entries"].append(

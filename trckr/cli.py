@@ -61,7 +61,7 @@ def parse_args(
         help="end of interval"
     )
     add_parse.add_argument(
-        "--note",
+        "note",
         type=str,
         help="a note for the interval"
     )
@@ -74,12 +74,12 @@ def parse_args(
         help="start the timer with a note"
     )
     start_parse.add_argument(
-        "--from",
+        "from",
         type=str,
         help="start of interval"
     )
     start_parse.add_argument(
-        "--note",
+        "note",
         type=str,
         help="a note for the interval"
     )
@@ -92,7 +92,7 @@ def parse_args(
         help="stop the current timer"
     )
     stop_parse.add_argument(
-        "--to",
+        "to",
         type=str,
         help="end of interval"
     )

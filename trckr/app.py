@@ -97,6 +97,7 @@ def main(
             key: value
             for key, value in kargs.items()
             if value is not None
+            and value != "-"
         }
     }
     try:
