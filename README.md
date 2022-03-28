@@ -13,6 +13,7 @@ The main features are as follows:
 How to use Trckr is described by examples. This section includes a number of example commands and an example of a powerful repo config.
 
 ### Example commands
+#### Long form
 ```sh
 # Initialize trckr
 # Creates a ".trckr.json" in the current directory
@@ -35,14 +36,33 @@ track add 9:00 17:00 "Working 9 to 5"
 track list today
 ```
 
+#### Short form
+```sh
+# Start a timer from now
+st t Work now
+# Stop a timer now
+st s
+
+# Start a timer from 09:00
+st t 9:00 Later morning work
+# Stop timer at specific time
+st s 16:00
+
+# Add entry
+st a 9:00-17:00 Working 9 to 5
+
+# List all entries for active user in active context today
+st l today
+```
+
 ### Example config
 A powerful example configurator for a project local config is as follows:
 ```json
 {
     "data_type": "json",
-    "path": "%(HOME)s/.trckr-data",
+    "path": "{HOME}/.trckr-data",
     "type": "struct",
-    "userid": "%(USER)s",
+    "userid": "{USER}",
     "contextid": "trckr",
     "locked": true
 }
