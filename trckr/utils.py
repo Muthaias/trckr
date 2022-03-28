@@ -15,23 +15,20 @@ def default_config():
     return {
         "database": {
             "data_type": "json",
-            "path": "%(HOME)s/.trckr-%(GITNAME)s",
+            "path": "{HOME}/.trckr-{GITNAME}",
             "type": "struct",
         },
         "defaults": {
-            "contextid": "%(GITNAME)s",
-            "userid": "%(USER)s",
-            "note": "%(GITNAME)s-%(GITBRANCH)s",
+            "contextid": "{GITNAME}",
+            "userid": "{USER}",
+            "note": "{GITNAME}-{GITBRANCH}",
         }
     }
 
 
 def parse_path(path_template, data):
     try:
-        return path_template % {
-            key: str(value)
-            for key, value in data.items()
-        }
+        return path_template.format(**data)
     except (ValueError, KeyError) as e:
         raise TrckrError(
             f"Failed to parse path template: {str(e)}: in '{path_template}'"

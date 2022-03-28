@@ -13,10 +13,10 @@ from .utils import (
 
 def parse_meta(argv, defaults=None):
     defaults = {} if defaults is None else defaults
-    note = " ".join(argv)
+    note = {"note": " ".join(argv)} if len(argv) > 0 else {}
     return {
         **defaults,
-        "note": note
+        **note
     }
 
 

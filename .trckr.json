@@ -2,12 +2,12 @@
     "created": "2022-01-28 00:47:44.827998",
     "database": {
         "data_type": "json",
-        "path": "%(HOME)s/.trckr-%(GITNAME)s",
+        "path": "{HOME}/.trckr-{GITNAME}",
         "type": "struct"
     },
     "defaults": {
-        "contextid": "%(GITNAME)s",
-        "note": "%(GITNAME)s-%(GITBRANCH)s",
-        "userid": "%(USER)s"
+        "contextid": "{GITNAME}",
+        "note": "{GITNAME}-{GITBRANCH}",
+        "userid": "{USER}"
     }
 }
