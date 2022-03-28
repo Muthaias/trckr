@@ -57,11 +57,14 @@ def struct_database(config):
     return None
 
 
-def parse_date_input(date_input):
+def parse_time(date_input):
     current = datetime.now()
-    if date_input == "-":
-        return current
-    elif date_input is None:
+    if (
+        date_input == "-"
+        or date_input == "now"
+        or date_input is None
+        or date_input == ""
+    ):
         return current
     else:
         with suppress(UnboundLocalError):
@@ -69,11 +72,15 @@ def parse_date_input(date_input):
                 time = datetime.strptime(date_input, "%H:%M")
             with suppress(ValueError):
                 time = datetime.strptime(date_input, "%H:%M:%S")
+            with suppress(ValueError):
+                time = datetime.strptime(date_input, "%m/%d")
 
             return current.replace(
                 hour=time.hour,
                 minute=time.minute,
-                second=time.second
+                second=time.second,
+                day=time.day,
+                month=time.month
             )
     raise TrckrError(f"Failed to parse date input: {date_input}")
 
@@ -135,8 +142,8 @@ def parse_interval(interval):
         with suppress(ValueError):
             [a, b] = interval.split("-")
             return (
-                parse_date_input(a),
-                parse_date_input(b)
+                parse_time(a),
+                parse_time(b)
             )
 
     raise TrckrError(f"Unable to parse interval: '{interval}'")
