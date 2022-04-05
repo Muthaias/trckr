@@ -6,7 +6,9 @@ from .utils import (
     parse_start,
     parse_stop,
     parse_add,
-    parse_list
+    parse_list,
+    parse_config_property,
+    parse_time
 )
 
 
@@ -36,12 +38,28 @@ def cmd_list(argv):
     )
 
 
+def cmd_config_property(argv):
+    return parse_config_property(
+        property=argv[0],
+        value=argv[1]
+    )
+
+
+def cmd_config_init(argv):
+    return parse_config_property(
+        property="created",
+        value=parse_time("now")
+    )
+
+
 def parse_args(argv):
     commands = {
         "t": cmd_start,
         "a": cmd_add,
         "s": cmd_stop,
         "l": cmd_list,
+        "cs": cmd_config_property,
+        "ci": cmd_config_init
     }
     try:
         command_id = argv[0]

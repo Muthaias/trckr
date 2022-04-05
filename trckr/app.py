@@ -97,7 +97,7 @@ def exec(config, database, command):
         "stop": lambda db: stop_timer(db, command["time"]),
         "list": lambda db: list_entries(db, command["interval"]),
         "config": lambda db: set_property(
-            command["path"],
+            command.get("path", config.get("_path")),
             command["property"],
             command["value"]
         ),

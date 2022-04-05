@@ -160,10 +160,14 @@ def parse_list(intervalstr):
     }
 
 
-def parse_config_property(path, property, value):
+def parse_config_property(property, value, path=None):
     return {
         "type": "config",
-        "path": path,
         "property": property,
-        "value": value
+        "value": value,
+        **(
+            {}
+            if path is None
+            else {"path": path}
+        )
     }

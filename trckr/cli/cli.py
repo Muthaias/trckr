@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2022 Mattias Nyberg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import datetime
 from argparse import ArgumentParser
 from .utils import (
     CLIParseError,
@@ -9,7 +8,8 @@ from .utils import (
     parse_start,
     parse_stop,
     parse_add,
-    parse_list
+    parse_list,
+    parse_time
 )
 
 
@@ -196,7 +196,7 @@ def args_to_command(config, command, **kargs):
         return parse_config_property(
             path=config_path,
             property="created",
-            value=str(datetime.datetime.now())
+            value=str(parse_time("now"))
         )
     elif command == "set":
         return parse_config_property(
