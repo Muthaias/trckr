@@ -62,12 +62,16 @@ st t now work on trackr; sleep 15m; st s
 A powerful example configurator for a project local config is as follows:
 ```json
 {
-    "data_type": "json",
-    "path": "{HOME}/.trckr-data",
-    "type": "struct",
-    "userid": "{USER}",
-    "contextid": "trckr",
-    "locked": true
+    "database": {
+        "data_type": "json",
+        "path": "{HOME}/.trckr-{GITNAME}",
+        "type": "struct"
+    },
+    "defaults": {
+        "contextid": "{GITNAME}",
+        "note": "{GITNAME}-{GITBRANCH}",
+        "userid": "{USER}"
+    }
 }
 ```
 Name the configuration `.trckr.json` and place it in the root of your project.
