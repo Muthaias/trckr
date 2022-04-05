@@ -53,6 +53,9 @@ st a 9:00-17:00 Working 9 to 5
 
 # List all entries for active user in active context today
 st l today
+
+# Pomodoro
+st t now work on trackr; sleep 15m; st s
 ```
 
 ### Example config
