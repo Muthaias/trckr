@@ -54,7 +54,7 @@ def cmd_config_init(argv):
     """Initialize the tracker in current direcotry: No arguments"""
     return parse_config_property(
         property="created",
-        value=parse_time("now")
+        value=str(parse_time("now"))
     )
 
 
