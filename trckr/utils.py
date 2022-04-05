@@ -32,8 +32,11 @@ def parse_path(path_template, data):
         )
 
 
-def parse_id(id):
-    return None if id == "-" else id
+def hours_and_minutes(td):
+    return (
+        td.days * 24 + td.seconds // 3600,
+        td.seconds // 60 % 60
+    )
 
 
 def struct_database(config):

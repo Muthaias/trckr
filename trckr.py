@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import sys
-import json
 from trckr import app, cli
 
 

@@ -10,6 +10,7 @@ from .utils import (
     config_from_json,
     writable_config,
     insert_into_struct,
+    hours_and_minutes,
 )
 from .database import Meta
 from .exceptions import TrckrError
@@ -38,12 +39,6 @@ def list_entries(db, interval=[None, None], format="list"):
         to_time=to_time
     )
 
-    def _hours_and_minutes(td):
-        return (
-            td.days * 24 + td.seconds // 3600,
-            td.seconds // 60 % 60
-        )
-
     grouped_entries = groupby(
         entries,
         key=lambda e: e.meta.contextid
@@ -55,12 +50,12 @@ def list_entries(db, interval=[None, None], format="list"):
             [entry.stop - entry.start for entry in entry_list],
             datetime.timedelta()
         )
-        print(f"{contextid}: {timeformat % _hours_and_minutes(groupsum)}")
+        print(f"{contextid}: {timeformat % hours_and_minutes(groupsum)}")
         for entry in entry_list:
             difference = entry.stop - entry.start
             print(
                 f"  {entry.start.date()}: "
-                f"{timeformat % _hours_and_minutes(difference)} "
+                f"{timeformat % hours_and_minutes(difference)} "
                 f"# {entry.meta.note}"
             )
 
