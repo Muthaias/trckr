@@ -4,22 +4,20 @@
 import sys
 import os
 import json
-from trckr import app, short, utils
+from trckr import app, cli, utils
 from trckr.exceptions import TrckrError
-
-
-CONFIG_PATH = os.environ.get("TRCKR_CONFIG", ".trckr.json")
+from trckr.cli.utils import CLIParseError
 
 
 if __name__ == "__main__":
     try:
-        config = app.load_config(CONFIG_PATH)
+        config = app.load_config(cli.utils.DEFAULT_CONFIG_PATH)
         database = app.load_database(config)
-        command = short.parse_args(sys.argv[1:])
+        command = cli.short.parse_args(sys.argv[1:])
         app.exec(
             config,
             database,
             command
         )
-    except TrckrError as e:
+    except (CLIParseError, TrckrError) as e:
         print(str(e))

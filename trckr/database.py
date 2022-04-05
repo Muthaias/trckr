@@ -115,8 +115,7 @@ class StructDatabase(DatabaseInterface):
     def _entries(self):
         return (
             Entry.from_data(entry)
-            for entry
-            in self._data["entries"]
+            for entry in self._data["entries"]
         )
 
     def _stop(self, time: datetime):

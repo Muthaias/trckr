@@ -67,18 +67,27 @@ def parse_time(date_input):
         with suppress(UnboundLocalError):
             with suppress(ValueError):
                 time = datetime.strptime(date_input, "%H:%M")
+                return current.replace(
+                    hour=time.hour,
+                    minute=time.minute,
+                    second=time.second,
+                )
             with suppress(ValueError):
                 time = datetime.strptime(date_input, "%H:%M:%S")
+                return current.replace(
+                    hour=time.hour,
+                    minute=time.minute,
+                    second=time.second,
+                )
             with suppress(ValueError):
                 time = datetime.strptime(date_input, "%m/%d")
-
-            return current.replace(
-                hour=time.hour,
-                minute=time.minute,
-                second=time.second,
-                day=time.day,
-                month=time.month
-            )
+                return current.replace(
+                    hour=time.hour,
+                    minute=time.minute,
+                    second=time.second,
+                    day=time.day,
+                    month=time.month
+                )
     raise TrckrError(f"Failed to parse date input: {date_input}")
 
 

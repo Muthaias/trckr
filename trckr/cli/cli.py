@@ -3,13 +3,19 @@
 
 import os
 from argparse import ArgumentParser
-
-
-DEFAULT_CONFIG_PATH = os.environ.get("TRCKR_CONFIG", ".trckr.json")
+from .utils import (
+    CLIParseError,
+    parse_config_property,
+    parse_start,
+    parse_stop,
+    parse_add,
+    parse_list
+)
 
 
 def parse_args(
-    argv
+    argv,
+    default_config_path=None
 ):
     parser = ArgumentParser(
         description="Trckr is a simple time tracking tool."
@@ -18,7 +24,7 @@ def parse_args(
         "--config",
         type=str,
         dest="config_path",
-        default=DEFAULT_CONFIG_PATH,
+        default=default_config_path,
         help="path to config file"
     )
     parser.add_argument(
@@ -150,3 +156,53 @@ def parse_args(
         parser.print_help()
 
     return vars(args)
+
+
+def args_to_command(config, command, **kargs):
+    args = {
+        **config.get("defaults", {}),
+        **{
+            key: value
+            for key, value in kargs.items()
+            if value is not None
+            and value != "-"
+        }
+    }
+    config_path = config["_path"]
+    meta = {
+        metaid: args.get(metaid)
+        for metaid in ["userid", "contextid", "note"]
+        if metaid in args
+    }
+    if command == "add":
+        return parse_add(
+            "-".join([args.get("from"), args.get("to")]),
+            [],
+            meta
+        )
+    elif command == "start":
+        return parse_start(
+            args.get("from"),
+            [],
+            meta
+        )
+    elif command == "stop":
+        return parse_stop(args.get("to"))
+    elif command == "list":
+        return parse_list(
+            "-".join([args.get("from"), args.get("to")])
+        )
+    elif command == "init":
+        return parse_config_property(
+            path=config_path,
+            property="created",
+            value=str(datetime.datetime.now())
+        )
+    elif command == "set":
+        return parse_config_property(
+            path=config_path,
+            property=args["property"],
+            value=args["value"]
+        )
+    
+    raise CLIParseError()

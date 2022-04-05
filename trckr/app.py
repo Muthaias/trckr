@@ -98,57 +98,11 @@ def exec(config, database, command):
         "add": lambda db: add_entry(db, command["interval"], meta),
         "start": lambda db: start_timer(db, command["time"], meta),
         "stop": lambda db: stop_timer(db, command["time"]),
-        "list": lambda db: list_entries(db, command["interval"])
+        "list": lambda db: list_entries(db, command["interval"]),
+        "config": lambda db: set_property(command["path"], command["property"], command["value"]),
     }
     try:
         command_type = command["type"]
         tracker_cmds[command_type](database)
     except KeyError:
         raise TrckrError(f"Command type not found: {command_type}")
-
-
-def main(
-    config,
-    database,
-    command,
-    **kargs
-):
-    args = {
-        **config.get("defaults", {}),
-        **{
-            key: value
-            for key, value in kargs.items()
-            if value is not None
-            and value != "-"
-        }
-    }
-    try:
-        config_path = config["_path"]
-        from_time = parse_time(args.get("from"))
-        to_time = parse_time(args.get("to"))
-        meta = Meta.from_data(args)
-        tracker_cmds = {
-            "add": lambda db: add_entry(db, [from_time, to_time], meta),
-            "start": lambda db: start_timer(db, from_time, meta),
-            "stop": lambda db: stop_timer(db, to_time),
-            "list": lambda db: list_entries(db, parse_interval(args.get("interval")))
-        }
-        root_cmds = {
-            "init": lambda: set_property(
-                config_path,
-                "created",
-                str(datetime.datetime.now())
-            ),
-            "set": lambda: set_property(
-                config_path,
-                args["property"],
-                args["value"]
-            ),
-        }
-        if command in tracker_cmds:
-            tracker_cmds[command](database)
-
-        elif command in root_cmds:
-            root_cmds[command]()
-    except TrckrError as e:
-        print("Error:", str(e))
