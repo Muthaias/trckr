@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 Mattias Nyberg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import os
+import datetime
 from argparse import ArgumentParser
 from .utils import (
     CLIParseError,
@@ -204,5 +204,5 @@ def args_to_command(config, command, **kargs):
             property=args["property"],
             value=args["value"]
         )
-    
+
     raise CLIParseError(f"Command not found: {command}")

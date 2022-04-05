@@ -1,9 +1,8 @@
 # SPDX-FileCopyrightText: 2022 Mattias Nyberg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import sys
-import json
 from .utils import (
+    CLIParseError,
     parse_start,
     parse_stop,
     parse_add,
@@ -37,7 +36,7 @@ def cmd_list(argv):
     )
 
 
-def parse_args(argv): 
+def parse_args(argv):
     commands = {
         "t": cmd_start,
         "a": cmd_add,
@@ -50,11 +49,9 @@ def parse_args(argv):
         return command(argv[1:])
     except (IndexError, KeyError):
         raise CLIParseError(
-f"""
+            f"""
 This script aims to be an efficient way to track time.
 Usage: tracker.py <command> [options]
 - command: {", ".join(commands.keys())}
-"""
+""".strip()
         )
-
-

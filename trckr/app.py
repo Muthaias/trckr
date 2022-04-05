@@ -3,16 +3,13 @@
 
 import datetime
 from itertools import groupby
-from operator import attrgetter
 from .data_extensions import standard_extensions
 from .utils import (
     first_database,
     database_loaders,
     config_from_json,
     writable_config,
-    parse_time,
     insert_into_struct,
-    parse_interval,
 )
 from .database import Meta
 from .exceptions import TrckrError
@@ -99,7 +96,11 @@ def exec(config, database, command):
         "start": lambda db: start_timer(db, command["time"], meta),
         "stop": lambda db: stop_timer(db, command["time"]),
         "list": lambda db: list_entries(db, command["interval"]),
-        "config": lambda db: set_property(command["path"], command["property"], command["value"]),
+        "config": lambda db: set_property(
+            command["path"],
+            command["property"],
+            command["value"]
+        ),
     }
     try:
         command_type = command["type"]
