@@ -14,7 +14,7 @@ from .utils import (
 
 def cmd_start(argv):
     """Start timer: (time|now) ([...note...])"""
-    parse_start(
+    return parse_start(
         timestr=argv[0] if len(argv) > 0 else None,
         metalist=argv[1:]
     )
@@ -22,7 +22,7 @@ def cmd_start(argv):
 
 def cmd_stop(argv):
     """Stop current timer: (time|now)"""
-    parse_stop(
+    return parse_stop(
         timestr=argv[0] if len(argv) > 0 else None,
     )
 
