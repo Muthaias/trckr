@@ -205,4 +205,4 @@ def args_to_command(config, command, **kargs):
             value=args["value"]
         )
     
-    raise CLIParseError()
+    raise CLIParseError(f"Command not found: {command}")
