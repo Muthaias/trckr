@@ -8,6 +8,7 @@ from contextlib import suppress
 
 
 DEFAULT_CONFIG_PATH = os.environ.get("TRCKR_CONFIG", ".trckr.json")
+BASE_TIME = datetime.now()
 
 
 class CLIParseError(Exception):
@@ -15,7 +16,7 @@ class CLIParseError(Exception):
 
 
 def parse_time(date_input):
-    current = datetime.now()
+    current = BASE_TIME
     if (
         date_input == "-"
         or date_input == "now"
@@ -55,7 +56,7 @@ def parse_interval(interval):
     if interval is None:
         return (None, None)
 
-    current = datetime.now()
+    current = BASE_TIME
     if (
         interval == "today"
         or interval == "day"
