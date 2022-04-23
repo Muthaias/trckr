@@ -36,9 +36,10 @@ def cmd_add(argv):
 
 
 def cmd_list(argv):
-    """List the time entries in interval: (interval)"""
+    """List the time entries in interval: (interval) (list|json|yaml)"""
     return parse_list(
-        intervalstr=argv[0] if len(argv) > 0 else None,
+        intervalstr=argv[0] if len(argv) > 0 and argv[0] != "-" else None,
+        list_format=argv[1] if len(argv) > 1 else "list"
     )
 
 

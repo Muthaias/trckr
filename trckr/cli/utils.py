@@ -153,10 +153,11 @@ def parse_add(intervalstr, metalist, defaults={}):
     }
 
 
-def parse_list(intervalstr):
+def parse_list(intervalstr, list_format="list"):
     [s, t] = parse_interval(intervalstr)
     return {
         "type": "list",
+        "format": list_format,
         "interval": [s, t],
     }
 
