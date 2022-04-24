@@ -53,7 +53,7 @@ def parse_time(date_input):
 
 
 def parse_interval(interval):
-    if interval is None:
+    if interval is None or interval == "-":
         return (None, None)
 
     current = BASE_TIME

@@ -113,7 +113,7 @@ def parse_args(
     list_parse.add_argument(
         "interval",
         type=str,
-        help="interval"
+        help="interval to list"
     )
     list_parse.add_argument(
         "--format",
@@ -176,7 +176,7 @@ def args_to_command(config, command, **kargs):
     }
     if command == "add":
         return parse_add(
-            "-".join([args.get("from"), args.get("to")]),
+            "-".join([args["from"], args["to"]]),
             [],
             meta
         )
@@ -190,7 +190,8 @@ def args_to_command(config, command, **kargs):
         return parse_stop(args.get("to"))
     elif command == "list":
         return parse_list(
-            "-".join([args.get("from"), args.get("to")])
+            args.get("interval", "-"),
+            args.get("format", "list")
         )
     elif command == "init":
         return parse_config_property(
